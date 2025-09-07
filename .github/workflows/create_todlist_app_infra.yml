@@ -1,0 +1,101 @@
+name: Provision ToDoList App infra
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: ENVIRONMENT name
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+         - dev
+         - qa
+      TF_LOG_LEVEL:
+        description: TF LOG level
+        default: 'WARN'
+        required: true
+        type: choice
+        options:
+         - WARN
+         - INFO
+      TF_ACTION:
+        description: TF Action
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+         - plan
+         - apply
+         - destroy
+
+jobs:
+  todolist-app:
+    name: To do list app
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: "1.12.0"
+
+      - uses: terraform-linters/setup-tflint@v4
+        name: Setup TFLint
+        with:
+          tflint_version: v0.52.0
+
+      - name: Show version and run tflint
+        shell: bash
+        env:
+         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+         cd ToDoList-infra
+         tflint --version
+         tflint --init
+         tflint
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_ID }}:role/devops-infra-role
+          role-session-name: ${{ inputs.ENVIRONMENT }}-${{ github.run_id }}
+
+      - name: Echo input
+        shell: bash
+        env:
+          ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
+        run: |
+          echo "environment=$ENVIRONMENT" >> $GITHUB_STEP_SUMMARY
+
+      - name: Terraform Apply
+        env:
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          REGION: ${{ vars.AWS_REGION }}
+          ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
+        run: |
+          cd ToDoList-infra
+          echo "ENVIRONMENT=\"$ENVIRONMENT\"" >> default.auto.tfvars
+          echo "role_arn=\"${{ vars.ROLE_ARN }}\"" >> default.auto.tfvars
+          echo "---------------terraform init-------------------"
+          terraform init -backend-config="bucket=$S3_BUCKET" \
+               -backend-config="key=github/todolistapp/$ENVIRONMENT/terraform.tfstate" \
+               -backend-config="region=$REGION"
+          echo "---------------terraform validate---------------------"
+          terraform validate
+          echo "---------------terraform ${{ github.event.inputs.TF_ACTION }}-------------------"
+          if [ "${{ github.event.inputs.TF_ACTION }}" == "plan" ]; then
+            terraform plan
+          else
+            terraform ${{ github.event.inputs.TF_ACTION }} -auto-approve
+          fi
+
