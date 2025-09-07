@@ -79,7 +79,7 @@ resource "aws_lambda_permission" "apigw_lambda_get" {
   action        = "lambda:InvokeFunction"
   function_name = data.aws_lambda_function.crud-lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.get_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
+  source_arn    = "arn:aws:execute-api:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.get_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
 }
 
 resource "aws_lambda_permission" "apigw_lambda_create" {
@@ -87,7 +87,7 @@ resource "aws_lambda_permission" "apigw_lambda_create" {
   action        = "lambda:InvokeFunction"
   function_name = data.aws_lambda_function.crud-lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.create_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
+  source_arn    = "arn:aws:execute-api:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.create_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
 }
 
 resource "aws_lambda_permission" "apigw_lambda_delete" {
@@ -95,7 +95,7 @@ resource "aws_lambda_permission" "apigw_lambda_delete" {
   action        = "lambda:InvokeFunction"
   function_name = data.aws_lambda_function.crud-lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.delete_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
+  source_arn    = "arn:aws:execute-api:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.delete_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
 }
 
 
@@ -104,6 +104,6 @@ resource "aws_lambda_permission" "apigw_lambda_post" {
   action        = "lambda:InvokeFunction"
   function_name = data.aws_lambda_function.crud-lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.post_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
+  source_arn    = "arn:aws:execute-api:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.post_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
 }
 
