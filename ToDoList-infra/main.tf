@@ -1,7 +1,7 @@
 module "api-gateway" {
   source      = "./modules/api-gateway"
   environment = var.environment
-  region = var.region
+  region      = var.region
 }
 
 module "dynamodb" {
@@ -17,6 +17,7 @@ module "lambda" {
   source          = "./modules/lambda"
   environment     = var.environment
   lambda_iam_role = aws_iam_role.lambda_role.arn
+  region          = var.region
 }
 
 resource "aws_iam_policy" "lambda_policy" {
