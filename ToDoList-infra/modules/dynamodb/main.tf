@@ -3,5 +3,8 @@ resource "aws_dynamodb_table" "todolisttable" {
   hash_key       = "id"
   name           = "${var.environment}-todolisttable"
   stream_enabled = false
-
+  attribute {
+    name = "id"
+    type = "S" 
+  }
 }

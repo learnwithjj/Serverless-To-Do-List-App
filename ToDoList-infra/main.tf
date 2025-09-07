@@ -1,10 +1,13 @@
 module "api-gateway" {
-  source      = "./modules/apigateway"
+  source      = "./modules/api-gateway"
   environment = var.environment
+  region      = var.region
+  depends_on  = [module.lambda]
 }
 
 module "dynamodb" {
-  source = "./modules/dynamodb"
+  source      = "./modules/dynamodb"
+  environment = var.environment
 }
 
 #module "eventbridge" {
@@ -12,9 +15,11 @@ module "dynamodb" {
 #}
 
 module "lambda" {
-  source      = "./modules/lambda"
-  environment = var.environment
-  iam_role    = aws_iam_role.lambda_role.arn
+  source          = "./modules/lambda"
+  environment     = var.environment
+  lambda_iam_role = aws_iam_role.lambda_role.arn
+  region          = var.region
+  depends_on      = [module.dynamodb]
 }
 
 resource "aws_iam_policy" "lambda_policy" {
@@ -35,7 +40,7 @@ resource "aws_iam_policy" "lambda_policy" {
             "dynamodb:DeleteItem",
             "dynamodb:UpdateItem"
           ],
-          "Resource" : "arn:aws:dynamodb:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:table/${var.environment}-todolisttable"
+          "Resource" : "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.environment}-todolisttable"
         },
         {
           "Sid" : "SES",
