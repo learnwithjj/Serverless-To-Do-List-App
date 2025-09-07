@@ -13,9 +13,9 @@ module "dynamodb" {
 #}
 
 module "lambda" {
-  source      = "./modules/lambda"
-  environment = var.environment
-  iam_role    = aws_iam_role.lambda_role.arn
+  source          = "./modules/lambda"
+  environment     = var.environment
+  lambda_iam_role = aws_iam_role.lambda_role.arn
 }
 
 resource "aws_iam_policy" "lambda_policy" {
