@@ -11,5 +11,11 @@ resource "aws_lambda_function" "crud" {
   handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.lambda_function_crud.output_base64sha256
   runtime          = "python3.13"
+  environment {
+    variables = {
+      REGION      = "${var.region}"
+      TASKS_TABLE = "${var.environment}-todolisttable"
+    }
+  }
 }
 
