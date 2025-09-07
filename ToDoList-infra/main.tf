@@ -1,5 +1,5 @@
 module "api-gateway" {
-  source      = "./modules/apigateway"
+  source      = "./modules/api-gateway"
   environment = var.environment
 }
 
