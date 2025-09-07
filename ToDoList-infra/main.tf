@@ -1,6 +1,7 @@
 module "api-gateway" {
   source      = "./modules/api-gateway"
   environment = var.environment
+  region = var.region
 }
 
 module "dynamodb" {
@@ -36,7 +37,7 @@ resource "aws_iam_policy" "lambda_policy" {
             "dynamodb:DeleteItem",
             "dynamodb:UpdateItem"
           ],
-          "Resource" : "arn:aws:dynamodb:${data.aws_caller_identity.current.region}:${data.aws_caller_identity.current.account_id}:table/${var.environment}-todolisttable"
+          "Resource" : "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.environment}-todolisttable"
         },
         {
           "Sid" : "SES",

@@ -86,6 +86,7 @@ jobs:
           cd ToDoList-infra
           echo "ENVIRONMENT=\"$ENVIRONMENT\"" >> default.auto.tfvars
           echo "role_arn=\"${{ vars.ROLE_ARN }}\"" >> default.auto.tfvars
+          echo "region=\"${{ vars.AWS_REGION }}\"" >> default.auto.tfvars
           echo "---------------terraform init-------------------"
           terraform init -backend-config="bucket=$S3_BUCKET" \
                -backend-config="key=github/todolistapp/$ENVIRONMENT/terraform.tfstate" \
