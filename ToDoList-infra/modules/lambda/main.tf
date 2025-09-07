@@ -10,6 +10,6 @@ resource "aws_lambda_function" "crud" {
   role             = var.lambda_iam_role
   handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.lambda_function_crud.output_base64sha256
-  runtime          = "Python 3.13"
+  runtime          = "python3.13"
 }
 
