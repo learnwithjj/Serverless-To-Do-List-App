@@ -15,25 +15,25 @@ resource "aws_apigatewayv2_integration" "todoint" {
 }
 
 resource "aws_apigatewayv2_route" "POST" {
-  api_id    = aws_apigatewayv2_api.example.id
+  api_id    = aws_apigatewayv2_api.todoapi.id
   route_key = "POST /task"
   target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
 resource "aws_apigatewayv2_route" "GET" {
-  api_id    = aws_apigatewayv2_api.example.id
+  api_id    = aws_apigatewayv2_api.todoapi.id
   route_key = "GET /task"
   target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
 resource "aws_apigatewayv2_route" "DELETE" {
-  api_id    = aws_apigatewayv2_api.example.id
+  api_id    = aws_apigatewayv2_api.todoapi.id
   route_key = "DELETE /task/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
 resource "aws_apigatewayv2_route" "PUT" {
-  api_id    = aws_apigatewayv2_api.example.id
+  api_id    = aws_apigatewayv2_api.todoapi.id
   route_key = "PUT /task/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
