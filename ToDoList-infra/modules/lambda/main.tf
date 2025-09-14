@@ -1,7 +1,7 @@
 data "archive_file" "lambda_function_crud" {
   type        = "zip"
-  source_file = "${path.module}/script/crud.py"
-  output_path = "${path.module}/script/crud.zip"
+  source_file = "script/crud.py"
+  output_path = "script/crud.zip"
 }
 
 resource "aws_lambda_function" "crud" {
