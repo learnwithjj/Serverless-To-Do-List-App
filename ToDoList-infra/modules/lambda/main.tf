@@ -1,6 +1,6 @@
 data "archive_file" "lambda_function_crud" {
   type        = "zip"
-  source_file = "${path.root}/script/crud.py"
+  source_file = "${path.module}/script/crud.py"
   output_path = "${path.module}/script/crud.zip"
 }
 
