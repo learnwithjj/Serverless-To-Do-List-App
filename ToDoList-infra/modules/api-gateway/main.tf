@@ -1,109 +1,51 @@
-resource "aws_api_gateway_rest_api" "Todolistapi" {
-  name        = "${var.environment}-ToDoApi"
-  description = "This is my API for todolistapp"
+resource "aws_apigatewayv2_api" "todoapi" {
+  name          = "${var.environment}-ToDoApi"
+  protocol_type = "HTTP"
 }
 
-resource "aws_api_gateway_resource" "TOdolistresource" {
-  rest_api_id = aws_api_gateway_rest_api.Todolistapi.id
-  parent_id   = aws_api_gateway_rest_api.Todolistapi.root_resource_id
-  path_part   = "${var.environment}-ToDoApiResource"
+resource "aws_apigatewayv2_integration" "todoint" {
+  api_id                    = aws_apigatewayv2_api.todoapi.id
+  integration_type          = "AWS_PROXY"
+  connection_type           = "INTERNET"
+  content_handling_strategy = "CONVERT_TO_TEXT"
+  description               = "Lambda crud"
+  integration_method        = "POST"
+  integration_uri           = data.aws_lambda_function.crud-lambda.invoke_arn
+  passthrough_behavior      = "WHEN_NO_MATCH"
 }
 
-resource "aws_api_gateway_method" "get_method" {
-  rest_api_id   = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id   = aws_api_gateway_resource.TOdolistresource.id
-  http_method   = "GET"
-  authorization = "NONE"
+resource "aws_apigatewayv2_route" "POST" {
+  api_id    = aws_apigatewayv2_api.example.id
+  route_key = "POST /task"
+  target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
-resource "aws_api_gateway_integration" "get_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id             = aws_api_gateway_resource.TOdolistresource.id
-  http_method             = aws_api_gateway_method.get_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = data.aws_lambda_function.crud-lambda.invoke_arn
+resource "aws_apigatewayv2_route" "GET" {
+  api_id    = aws_apigatewayv2_api.example.id
+  route_key = "GET /task"
+  target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
-resource "aws_api_gateway_method" "post_method" {
-  rest_api_id   = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id   = aws_api_gateway_resource.TOdolistresource.id
-  http_method   = "POST"
-  authorization = "NONE"
+resource "aws_apigatewayv2_route" "DELETE" {
+  api_id    = aws_apigatewayv2_api.example.id
+  route_key = "DELETE /task/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
-resource "aws_api_gateway_integration" "post_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id             = aws_api_gateway_resource.TOdolistresource.id
-  http_method             = aws_api_gateway_method.post_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = data.aws_lambda_function.crud-lambda.invoke_arn
+resource "aws_apigatewayv2_route" "PUT" {
+  api_id    = aws_apigatewayv2_api.example.id
+  route_key = "PUT /task/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
-resource "aws_api_gateway_method" "put_method" {
-  rest_api_id   = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id   = aws_api_gateway_resource.TOdolistresource.id
-  http_method   = "PUT"
-  authorization = "NONE"
+resource "aws_apigatewayv2_stage" "example" {
+  api_id      = aws_apigatewayv2_api.todoapi.id
+  name        = "${var.environment}-todo"
+  auto_deploy = true
+  tags = {
+    "ENVIRONMENT"    = "var.environment"
+    "DEPLOYED-USING" = "GITHUB ACTIONS"
+  }
 }
 
-resource "aws_api_gateway_integration" "put_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id             = aws_api_gateway_resource.TOdolistresource.id
-  http_method             = aws_api_gateway_method.put_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = data.aws_lambda_function.crud-lambda.invoke_arn
-}
-
-resource "aws_api_gateway_method" "delete_method" {
-  rest_api_id   = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id   = aws_api_gateway_resource.TOdolistresource.id
-  http_method   = "DELETE"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "delete_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.Todolistapi.id
-  resource_id             = aws_api_gateway_resource.TOdolistresource.id
-  http_method             = aws_api_gateway_method.delete_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = data.aws_lambda_function.crud-lambda.invoke_arn
-}
-
-
-resource "aws_lambda_permission" "apigw_lambda_get" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.crud-lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.get_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
-}
-
-resource "aws_lambda_permission" "apigw_lambda_post" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.crud-lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.post_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
-}
-
-resource "aws_lambda_permission" "apigw_lambda_delete" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.crud-lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.delete_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
-}
-
-
-resource "aws_lambda_permission" "apigw_lambda_put" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.crud-lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.Todolistapi.id}/*/${aws_api_gateway_method.put_method.http_method}${aws_api_gateway_resource.TOdolistresource.path}"
-}
 

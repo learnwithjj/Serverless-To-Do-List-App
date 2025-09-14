@@ -1,7 +1,6 @@
 module "api-gateway" {
   source      = "./modules/api-gateway"
   environment = var.environment
-  region      = var.region
   depends_on  = [module.lambda]
 }
 
