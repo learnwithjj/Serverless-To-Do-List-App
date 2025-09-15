@@ -1,4 +1,4 @@
-resource "aws_apigatewayv2_api" "todoapi" {
+'resource "aws_apigatewayv2_api" "todoapi" {
   name          = "${var.environment}-ToDoApi"
   protocol_type = "HTTP"
 }
@@ -38,7 +38,7 @@ resource "aws_apigatewayv2_route" "PUT" {
 resource "aws_apigatewayv2_stage" "todo" {
   api_id = aws_apigatewayv2_api.todoapi.id
   name   = "${var.environment}-todo"
-  access_log_settings = {
+  access_log_settings  {
     destination_arn = aws_cloudwatch_log_group.api.arn
     format = jsonencode({
       "method" : "$context.httpMethod",
