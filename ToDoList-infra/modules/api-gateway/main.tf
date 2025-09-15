@@ -4,11 +4,11 @@ resource "aws_apigatewayv2_api" "todoapi" {
 }
 
 resource "aws_apigatewayv2_integration" "todoint" {
-  api_id                    = aws_apigatewayv2_api.todoapi.id
-  integration_type          = "AWS_PROXY"
-  description               = "Lambda crud"
-  integration_method        = "POST"
-  integration_uri           = data.aws_lambda_function.crud-lambda.invoke_arn
+  api_id             = aws_apigatewayv2_api.todoapi.id
+  integration_type   = "AWS_PROXY"
+  description        = "Lambda crud"
+  integration_method = "POST"
+  integration_uri    = data.aws_lambda_function.crud-lambda.invoke_arn
 }
 
 resource "aws_apigatewayv2_route" "POST" {
@@ -36,8 +36,19 @@ resource "aws_apigatewayv2_route" "PUT" {
 }
 
 resource "aws_apigatewayv2_stage" "todo" {
-  api_id      = aws_apigatewayv2_api.todoapi.id
-  name        = "${var.environment}-todo"
+  api_id = aws_apigatewayv2_api.todoapi.id
+  name   = "${var.environment}-todo"
+  access_log_settings = {
+    destination_arn = aws_cloudwatch_log_group.api.arn
+    format = jsonencode({
+      "method" : "$context.httpMethod",
+      "path" : "$context.resourcePath",
+      "query" : "$input.params().querystring",
+      "headers" : "$input.params().header",
+      "body" : "#if($input.body != '') $input.body #else null #end"
+      }
+    )
+  }
   tags = {
     "ENVIRONMENT"    = "var.environment"
     "DEPLOYED-USING" = "GITHUB ACTIONS"
@@ -60,5 +71,14 @@ resource "aws_apigatewayv2_deployment" "todo" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_cloudwatch_log_group" "api" {
+  name = "${var.environment}/aws/apigateway"
+  tags = {
+    Environment = "${var.environment}"
+    Application = "apigateway"
+  }
+  retention_in_days = 3
 }
 
