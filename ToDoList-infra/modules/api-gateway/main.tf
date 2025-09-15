@@ -1,4 +1,4 @@
-'resource "aws_apigatewayv2_api" "todoapi" {
+resource "aws_apigatewayv2_api" "todoapi" {
   name          = "${var.environment}-ToDoApi"
   protocol_type = "HTTP"
 }
