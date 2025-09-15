@@ -38,16 +38,16 @@ resource "aws_apigatewayv2_route" "PUT" {
 resource "aws_apigatewayv2_stage" "todo" {
   api_id = aws_apigatewayv2_api.todoapi.id
   name   = "${var.environment}-todo"
-  access_log_settings  {
+  access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api.arn
     format = jsonencode({
-      "method" : "$context.httpMethod",
-      "path" : "$context.resourcePath",
-      "query" : "$input.params().querystring",
-      "headers" : "$input.params().header",
-      "body" : "#if($input.body != '') $input.body #else null #end"
-      }
-    )
+      requestId = "$context.requestId",
+      method    = "$context.httpMethod",
+      path      = "$context.resourcePath",
+      query     = "$input.params().querystring",
+      headers   = "$input.params().header",
+      body      = "#if($input.body != '') $input.body #else null #end"
+    })
   }
   tags = {
     "ENVIRONMENT"    = "var.environment"
