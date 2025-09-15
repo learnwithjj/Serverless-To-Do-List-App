@@ -35,14 +35,30 @@ resource "aws_apigatewayv2_route" "PUT" {
   target    = "integrations/${aws_apigatewayv2_integration.todoint.id}"
 }
 
-resource "aws_apigatewayv2_stage" "example" {
+resource "aws_apigatewayv2_stage" "todo" {
   api_id      = aws_apigatewayv2_api.todoapi.id
   name        = "${var.environment}-todo"
-  auto_deploy = true
   tags = {
     "ENVIRONMENT"    = "var.environment"
     "DEPLOYED-USING" = "GITHUB ACTIONS"
   }
 }
 
+resource "aws_apigatewayv2_deployment" "todo" {
+  api_id      = aws_apigatewayv2_api.todoapi.id
+  description = "${var.environment}-deployment"
+  triggers = {
+    redeployment = sha1(join(",", tolist([
+      jsonencode(aws_apigatewayv2_integration.todoint),
+      jsonencode(aws_apigatewayv2_route.POST),
+      jsonencode(aws_apigatewayv2_route.PUT),
+      jsonencode(aws_apigatewayv2_route.DELETE),
+      jsonencode(aws_apigatewayv2_route.GET),
+    ])))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
